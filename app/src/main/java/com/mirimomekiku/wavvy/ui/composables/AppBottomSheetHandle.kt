@@ -1,7 +1,6 @@
 package com.mirimomekiku.wavvy.ui.composables
 
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -35,13 +34,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.media3.session.MediaController
-import coil.compose.rememberAsyncImagePainter
+import coil.compose.AsyncImage
 import com.mirimomekiku.wavvy.helpers.getDominantColorAdjusted
 import com.mirimomekiku.wavvy.ui.compositions.LocalPlaybackViewModel
 import kotlinx.coroutines.CoroutineScope
@@ -113,9 +114,11 @@ fun AppBottomSheetHandle(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 if (currentMediaItem?.mediaMetadata?.artworkUri != null) {
-                    Image(
-                        painter = rememberAsyncImagePainter(currentMediaItem?.mediaMetadata?.artworkUri),
+                    AsyncImage(
+                        model = currentMediaItem?.mediaMetadata?.artworkUri,
                         contentDescription = "Album art",
+                        placeholder = ColorPainter(Color(0xFF484848)),
+                        error = ColorPainter(Color(0xFF484848)),
                         modifier = Modifier
                             .clip(MaterialTheme.shapes.small)
                             .size(40.dp)

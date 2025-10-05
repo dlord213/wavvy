@@ -10,14 +10,13 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SheetValue
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -88,12 +87,9 @@ class MainActivity : ComponentActivity() {
             val context = LocalContext.current
             val playbackViewModel: PlaybackViewModel = viewModel()
             val db = Room.databaseBuilder(
-                applicationContext,
-                AppDatabase::class.java,
-                "favorites"
+                applicationContext, AppDatabase::class.java, "favorites"
             ).build()
-            val dao =
-                db.favoriteDao()
+            val dao = db.favoriteDao()
 
             val favoriteViewModel: FavoriteViewModel = viewModel(
                 factory = FavoriteViewModelFactory(dao)
@@ -147,6 +143,9 @@ class MainActivity : ComponentActivity() {
                             }
 
                             BottomSheetScaffold(
+                                modifier = Modifier
+                                    .animateContentSize()
+                                    .navigationBarsPadding(),
                                 scaffoldState = scaffoldState,
                                 sheetPeekHeight = if (currentMediaItem != null) 68.dp else 0.dp,
                                 sheetDragHandle = {
@@ -167,7 +166,6 @@ class MainActivity : ComponentActivity() {
                                 },
                                 sheetContainerColor = animatedBaseColor,
                                 sheetContentColor = animatedTextColor,
-                                modifier = Modifier.animateContentSize()
                             ) { innerPadding ->
                                 NavHost(
                                     navController = navController,

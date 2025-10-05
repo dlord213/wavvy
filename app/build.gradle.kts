@@ -1,3 +1,9 @@
+import java.util.Properties
+
+val localProps = Properties().apply {
+    load(rootProject.file("local.properties").inputStream())
+}
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -8,6 +14,7 @@ plugins {
 
 
 android {
+
     namespace = "com.mirimomekiku.wavvy"
     compileSdk = 35
 
@@ -19,6 +26,7 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        buildConfigField("String", "token", "${localProps["token"]}")
     }
 
     buildTypes {
@@ -39,9 +47,8 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
-
-
 }
 
 dependencies {

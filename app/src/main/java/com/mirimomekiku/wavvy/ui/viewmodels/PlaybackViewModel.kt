@@ -3,7 +3,6 @@ package com.mirimomekiku.wavvy.ui.viewmodels
 import AlbumWithSongs
 import ArtistWithAlbums
 import android.content.Context
-import android.util.Log
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -12,6 +11,7 @@ import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
 import androidx.media3.common.Timeline
 import androidx.media3.session.MediaController
+import com.mirimomekiku.wavvy.BuildConfig
 import com.mirimomekiku.wavvy.extensions.currentMediaItems
 import com.mirimomekiku.wavvy.extensions.getDominantColor
 import com.mirimomekiku.wavvy.extensions.shuffledQueue
@@ -73,8 +73,7 @@ class PlaybackViewModel : ViewModel() {
             try {
                 _artistInfo.value = null
                 val artistQuery = extractPrimaryArtist(artistName)
-                val token =
-                    "Bearer ZuZCWYF3T0rzGlfrXKLXGCzGrKFY8vQ0OGvwSrQy2AuccYD7NJltJRMZWNirPgfy"
+                val token = BuildConfig.token
                 val response = RetrofitInstance.api.search(query = artistQuery, token = token)
 
                 val song = response.response.hits.firstOrNull()?.result

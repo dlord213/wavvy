@@ -1,7 +1,6 @@
 package com.mirimomekiku.wavvy.ui.composables.player.expandedsheet.defaultmaterial3
 
 import android.content.Intent
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -51,6 +50,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -59,7 +59,7 @@ import androidx.core.content.FileProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.media3.common.Player
 import androidx.media3.session.MediaController
-import coil.compose.rememberAsyncImagePainter
+import coil.compose.AsyncImage
 import com.mirimomekiku.wavvy.enums.Screens
 import com.mirimomekiku.wavvy.extensions.currentMediaItems
 import com.mirimomekiku.wavvy.helpers.getDominantColorAdjusted
@@ -162,16 +162,16 @@ fun PlaybackInfo(
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Column {
-                mediaItem?.mediaMetadata?.artworkUri?.let { uri ->
-                    Image(
-                        painter = rememberAsyncImagePainter(uri),
-                        contentDescription = "Album art",
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(MaterialTheme.shapes.extraLarge)
-                            .aspectRatio(1f)
-                    )
-                }
+                AsyncImage(
+                    model = mediaItem?.mediaMetadata?.artworkUri,
+                    contentDescription = "Album art",
+                    placeholder = ColorPainter(Color(0xFF484848)),
+                    error = ColorPainter(Color(0xFF484848)),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(MaterialTheme.shapes.extraLarge)
+                        .aspectRatio(1f)
+                )
             }
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -402,7 +402,6 @@ fun PlaybackInfo(
                                 mediaController.clearMediaItems()
                             }
                         )
-
                     }
                 }
             }
