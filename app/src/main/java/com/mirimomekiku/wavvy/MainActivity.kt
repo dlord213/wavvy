@@ -78,7 +78,7 @@ class MainActivity : ComponentActivity() {
 
     }
 
-    @OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
+    @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -122,25 +122,6 @@ class MainActivity : ComponentActivity() {
                                 targetValue = textColor,
                                 label = "sheetTextColorAnimation",
                             )
-
-                            val audioPermissionState =
-                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                                    rememberPermissionState(Manifest.permission.READ_MEDIA_AUDIO)
-                                } else {
-                                    rememberPermissionState(Manifest.permission.READ_EXTERNAL_STORAGE)
-                                }
-
-
-                            LaunchedEffect(audioPermissionState.status.isGranted) {
-                                if (audioPermissionState.status.isGranted) {
-                                    playbackViewModel.loadAudioFiles(context)
-                                    navController.navigate(route = Screens.Home.name) {
-                                        popUpTo(Screens.Start.name) {
-                                            inclusive = true
-                                        }
-                                    }
-                                }
-                            }
 
                             BottomSheetScaffold(
                                 modifier = Modifier

@@ -10,8 +10,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Storage
 import androidx.compose.material3.Button
@@ -19,6 +17,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -29,22 +28,33 @@ import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.mirimomekiku.wavvy.enums.Screens
 import com.mirimomekiku.wavvy.ui.composables.HeadingLogo
-import com.mirimomekiku.wavvy.ui.composables.RowPermissions
 import com.mirimomekiku.wavvy.ui.compositions.LocalNavController
+import com.mirimomekiku.wavvy.ui.compositions.LocalPlaybackViewModel
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun StartScreen() {
     val context = LocalContext.current
     val navController = LocalNavController.current
+    val playbackViewModel = LocalPlaybackViewModel.current
 
     val audioPermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
         Manifest.permission.READ_MEDIA_AUDIO
     } else Manifest.permission.READ_EXTERNAL_STORAGE
 
     val audioState = rememberPermissionState(audioPermission)
-
     val allGranted = audioState.status.isGranted
+
+    LaunchedEffect(audioState.status.isGranted) {
+        if (audioState.status.isGranted) {
+            playbackViewModel.loadAudioFiles(context)
+            navController.navigate(route = Screens.Home.name) {
+                popUpTo(Screens.Start.name) {
+                    inclusive = true
+                }
+            }
+        }
+    }
 
     if (!audioState.status.isGranted) {
         Column(
