@@ -28,7 +28,7 @@ wanted to explore more of Android Development especially `Kotlin`/`Compose`.
 
 ```
 Wavvy
-Copyright (C) 205 Jhon Lloyd Viernes
+Copyright (C) 2025 Jhon Lloyd Viernes
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
