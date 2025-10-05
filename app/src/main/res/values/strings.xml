@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Wavvy</string>
+    <string name="title_activity_start_screen">StartScreen</string>
+</resources>
