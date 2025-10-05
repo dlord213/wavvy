@@ -14,9 +14,8 @@ plugins {
 
 
 android {
-
     namespace = "com.mirimomekiku.wavvy"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.mirimomekiku.wavvy"
@@ -45,6 +44,7 @@ android {
     kotlinOptions {
         jvmTarget = "11"
     }
+
     buildFeatures {
         compose = true
         buildConfig = true
@@ -63,6 +63,7 @@ dependencies {
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -74,17 +75,20 @@ dependencies {
     implementation(libs.androidx.media3.session)
     implementation("androidx.compose.material:material-icons-extended")
     implementation("androidx.navigation:navigation-compose:$navVersion")
-    implementation("com.google.accompanist:accompanist-permissions:0.36.0")
+    implementation("com.google.accompanist:accompanist-permissions:0.37.3")
     implementation(platform("androidx.compose:compose-bom:2025.09.01"))
-    implementation("io.coil-kt:coil-compose:2.4.0")
+    implementation("io.coil-kt:coil-compose:2.7.0")
     implementation("androidx.media3:media3-exoplayer:1.8.0")
     implementation("androidx.media3:media3-exoplayer-dash:1.8.0")
     implementation("androidx.media3:media3-ui:1.8.0")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.5")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.9.4")
     implementation("androidx.palette:palette:1.0.0")
     implementation("androidx.room:room-runtime:$room_version")
     implementation("com.squareup.retrofit2:retrofit:3.0.0")
-    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
-    ksp("androidx.room:room-compiler:$room_version")
+    implementation("com.squareup.retrofit2:converter-gson:3.0.0")
+    implementation("androidx.datastore:datastore-preferences:1.1.7")
+    implementation("androidx.core:core-splashscreen:1.0.1")
+    implementation("androidx.compose.ui:ui-text-google-fonts:1.9.2")
 
+    ksp("androidx.room:room-compiler:$room_version")
 }

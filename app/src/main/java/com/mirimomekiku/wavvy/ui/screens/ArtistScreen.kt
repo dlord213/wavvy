@@ -182,7 +182,6 @@ fun ArtistScreen(
                     mediaController = mediaController,
                     showGoToArtist = false,
                     showDuration = true,
-                    showDropdown = false
                 )
             }
         }

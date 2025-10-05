@@ -77,7 +77,7 @@ fun MediaSlider(
             onValueChangeFinished = {
                 mediaController.seekTo(sliderPosition.toLong())
             },
-            valueRange = 0f..duration.toFloat(),
+            valueRange = 0f..duration,
             modifier = Modifier.weight(6f, fill = true),
             steps = 0,
             colors = sliderColors

@@ -42,7 +42,7 @@ fun MediaVolumeSlider(
 
     val deviceInfo = mediaController.deviceInfo
     val isRemote =
-        deviceInfo != null && deviceInfo.playbackType == 1
+        deviceInfo.playbackType == 1
     val isPlaying by playbackViewModel.isPlaying.collectAsStateWithLifecycle()
 
     // Local system volume
