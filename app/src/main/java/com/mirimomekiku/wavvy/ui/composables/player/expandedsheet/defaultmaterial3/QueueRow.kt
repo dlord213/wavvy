@@ -1,6 +1,5 @@
 package com.mirimomekiku.wavvy.ui.composables.player.expandedsheet.defaultmaterial3
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -18,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -25,7 +25,10 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.media3.common.MediaItem
 import androidx.media3.session.MediaController
-import coil.compose.rememberAsyncImagePainter
+import coil.compose.AsyncImage
+import coil.request.CachePolicy
+import coil.request.ImageRequest
+import com.mirimomekiku.wavvy.extensions.KEY_DOMINANT_COLOR
 import com.mirimomekiku.wavvy.extensions.getDominantColor
 import com.mirimomekiku.wavvy.helpers.getDominantColorAdjusted
 import com.mirimomekiku.wavvy.ui.compositions.LocalPlaybackViewModel
@@ -40,8 +43,9 @@ fun QueueRow(mediaItem: MediaItem, mediaController: MediaController) {
     val baseColor = getDominantColorAdjusted(context, mediaItem.mediaMetadata.artworkUri)
 
     fun playAudio() {
-        val existingIndex = (0 until mediaController.mediaItemCount)
-            .firstOrNull { i -> mediaController.getMediaItemAt(i).mediaId == mediaItem.mediaId }
+        val existingIndex = (0 until mediaController.mediaItemCount).firstOrNull { i ->
+            mediaController.getMediaItemAt(i).mediaId == mediaItem.mediaId
+        }
 
         if (existingIndex != null) {
             mediaController.seekTo(existingIndex, 0)
@@ -58,30 +62,34 @@ fun QueueRow(mediaItem: MediaItem, mediaController: MediaController) {
         mediaController.play()
     }
 
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
+    Row(verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .clip(MaterialTheme.shapes.medium)
             .clickable {
                 playAudio()
             }
             .background(
-                if (mediaItem.mediaMetadata.title.toString() == currentItem?.mediaMetadata?.title.toString())
-                    baseColor
-                else
-                    Color.Transparent
+                if (mediaItem.mediaMetadata.title.toString() == currentItem?.mediaMetadata?.title.toString()) baseColor
+                else Color.Transparent
             )
             .padding(8.dp)
             .fillMaxWidth()) {
-        mediaItem.mediaMetadata.artworkUri?.let { uri ->
-            Image(
-                painter = rememberAsyncImagePainter(uri),
-                contentDescription = "Album art",
-                modifier = Modifier
-                    .clip(MaterialTheme.shapes.extraSmall)
-                    .size(48.dp)
-            )
-        }
+
+        val dominantColor = (mediaItem.mediaMetadata.extras?.getInt(KEY_DOMINANT_COLOR)
+            ?: 0x484848) or 0xFF000000.toInt()
+
+        AsyncImage(
+            model = ImageRequest.Builder(LocalContext.current)
+                .data(mediaItem.mediaMetadata.artworkUri).crossfade(true)
+                .memoryCachePolicy(CachePolicy.ENABLED).diskCachePolicy(CachePolicy.ENABLED)
+                .build(),
+            contentDescription = "Album art",
+            placeholder = ColorPainter(Color(dominantColor)),
+            error = ColorPainter(Color(dominantColor)),
+            modifier = Modifier
+                .clip(MaterialTheme.shapes.extraSmall)
+                .size(48.dp)
+        )
 
         Spacer(modifier = Modifier.width(8.dp))
 
