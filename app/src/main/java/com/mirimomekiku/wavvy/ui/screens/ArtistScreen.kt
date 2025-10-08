@@ -26,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.ColorPainter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -44,11 +45,12 @@ fun ArtistScreen(
 ) {
     val playbackViewModel = LocalPlaybackViewModel.current
     val navController = LocalNavController.current
+    val context = LocalContext.current
 
     val artist = playbackViewModel.artistSelected.collectAsStateWithLifecycle()
 
     DisposableEffect(Unit) {
-        playbackViewModel.attachController(mediaController)
+        playbackViewModel.attachController(mediaController, context)
 
         onDispose { }
     }

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+    <color android:name="charcoal"
+        tools:ignore="ExtraText">#1E1E1E</color>
+    <color android:name="widget_bg">#FFFFFF</color>
+    <color android:name="gray">#B0B0B0</color>
+</resources>

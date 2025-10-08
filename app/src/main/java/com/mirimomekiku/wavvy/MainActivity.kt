@@ -1,8 +1,6 @@
 package com.mirimomekiku.wavvy
 
-import android.Manifest
 import android.content.ComponentName
-import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -19,7 +17,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.rememberBottomSheetScaffoldState
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -29,6 +26,7 @@ import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.media3.session.MediaController
@@ -37,9 +35,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.room.Room
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.isGranted
-import com.google.accompanist.permissions.rememberPermissionState
 import com.google.common.util.concurrent.ListenableFuture
 import com.mirimomekiku.wavvy.db.AppDatabase
 import com.mirimomekiku.wavvy.enums.Screens
@@ -74,6 +69,14 @@ class MainActivity : ComponentActivity() {
 
         controllerFuture.addListener({
             mediaController = controllerFuture.get()
+
+            val playbackViewModel: PlaybackViewModel =
+                ViewModelProvider(this)[PlaybackViewModel::class.java]
+
+            playbackViewModel.attachController(mediaController!!, this)
+            playbackViewModel.updatePlayingState(mediaController!!.isPlaying)
+            playbackViewModel.updateCurrentMediaItem(mediaController!!.currentMediaItem)
+
         }, ContextCompat.getMainExecutor(this))
 
     }

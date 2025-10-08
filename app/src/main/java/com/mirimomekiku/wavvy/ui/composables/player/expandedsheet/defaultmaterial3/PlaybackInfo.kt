@@ -119,9 +119,7 @@ fun PlaybackInfo(
         val currentIndex = mediaController.currentMediaItemIndex
 
         val lastIndex = mediaController.currentMediaItems.lastIndex
-        if (mediaController.isCurrentMediaItemSeekable &&
-            mediaController.currentPosition + 10000 < mediaController.duration
-        ) {
+        if (mediaController.isCurrentMediaItemSeekable && mediaController.currentPosition + 10000 < mediaController.duration) {
             mediaController.seekForward()
         } else if (currentIndex < lastIndex) {
             mediaController.seekToNext()
@@ -136,9 +134,7 @@ fun PlaybackInfo(
         if (!file.exists()) return
 
         val audioUri = FileProvider.getUriForFile(
-            context,
-            "com.mirimomekiku.wavvy.fileprovider",
-            file
+            context, "com.mirimomekiku.wavvy.fileprovider", file
         )
 
         val shareIntent = Intent(Intent.ACTION_SEND).apply {
@@ -161,18 +157,17 @@ fun PlaybackInfo(
         Column(
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            Column {
-                AsyncImage(
-                    model = mediaItem?.mediaMetadata?.artworkUri,
-                    contentDescription = "Album art",
-                    placeholder = ColorPainter(Color(0xFF484848)),
-                    error = ColorPainter(Color(0xFF484848)),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(MaterialTheme.shapes.extraLarge)
-                        .aspectRatio(1f)
-                )
-            }
+            AsyncImage(
+                model = mediaItem?.mediaMetadata?.artworkUri,
+                contentDescription = "Album art",
+                placeholder = ColorPainter(Color(0xFF484848)),
+                error = ColorPainter(Color(0xFF484848)),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(MaterialTheme.shapes.extraLarge)
+                    .aspectRatio(1f)
+            )
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -258,8 +253,7 @@ fun PlaybackInfo(
                     )
                 ) {
                     Icon(
-                        imageVector = Icons.Filled.Share,
-                        contentDescription = "Share audio file"
+                        imageVector = Icons.Filled.Share, contentDescription = "Share audio file"
                     )
                     Text(
                         "Share",
@@ -270,8 +264,7 @@ fun PlaybackInfo(
             }
             MediaSlider(mediaController, baseColor)
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(
+                modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(
                     24.dp, Alignment.CenterHorizontally
                 )
             ) {
@@ -316,9 +309,7 @@ fun PlaybackInfo(
                     }
                 }) {
                     Text(
-                        "Queue",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = textColor
+                        "Queue", style = MaterialTheme.typography.bodyMedium, color = textColor
                     )
                 }
             }
@@ -332,40 +323,34 @@ fun PlaybackInfo(
                         } else {
                             mediaController.setShuffleModeEnabled(true)
                         }
-                    }
-                ) {
+                    }) {
                     Icon(
                         imageVector = if (isShuffled) Icons.Filled.ShuffleOn else Icons.Filled.Shuffle,
                         contentDescription = "Shuffle queue",
                     )
                 }
                 IconButton(
-                    onClick = { playbackViewModel.toggleRepeatMode(mediaController) }
-                ) {
+                    onClick = { playbackViewModel.toggleRepeatMode(mediaController) }) {
                     Icon(
                         imageVector = when (repeatMode) {
                             Player.REPEAT_MODE_OFF -> Icons.Filled.Repeat      // normal repeat icon, off
                             Player.REPEAT_MODE_ONE -> Icons.Filled.RepeatOne  // repeat-one icon
                             Player.REPEAT_MODE_ALL -> Icons.Filled.RepeatOn      // repeat all icon
                             else -> Icons.Filled.Repeat
-                        },
-                        contentDescription = "Repeat Mode"
+                        }, contentDescription = "Repeat Mode"
                     )
 
                 }
                 IconButton(
                     onClick = {
                         menuExpanded = true
-                    }
-                ) {
+                    }) {
                     Icon(
                         imageVector = Icons.Filled.MoreHoriz,
                         contentDescription = "Repeat Mode",
                     )
                     DropdownMenu(
-                        expanded = menuExpanded,
-                        onDismissRequest = { menuExpanded = false }
-                    ) {
+                        expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
                         DropdownMenuItem(
                             text = { Text("Go to album") },
                             onClick = {
@@ -379,29 +364,23 @@ fun PlaybackInfo(
                                 }
                             },
                         )
-                        DropdownMenuItem(
-                            text = { Text("Go to artist") },
-                            onClick = {
-                                menuExpanded = false
-                                scope.launch {
-                                    scaffoldState.bottomSheetState.partialExpand()
-                                }
-                                playbackViewModel.selectArtist(mediaItem?.mediaMetadata?.artist.toString())
-                                navController.navigate(route = Screens.Artist.name) {
-                                    popUpTo(Screens.Artist.name)
-                                }
+                        DropdownMenuItem(text = { Text("Go to artist") }, onClick = {
+                            menuExpanded = false
+                            scope.launch {
+                                scaffoldState.bottomSheetState.partialExpand()
                             }
-                        )
-                        DropdownMenuItem(
-                            text = { Text("Clear playing queue") },
-                            onClick = {
-                                menuExpanded = false
-                                scope.launch {
-                                    scaffoldState.bottomSheetState.partialExpand()
-                                }
-                                mediaController.clearMediaItems()
+                            playbackViewModel.selectArtist(mediaItem?.mediaMetadata?.artist.toString())
+                            navController.navigate(route = Screens.Artist.name) {
+                                popUpTo(Screens.Artist.name)
                             }
-                        )
+                        })
+                        DropdownMenuItem(text = { Text("Clear playing queue") }, onClick = {
+                            menuExpanded = false
+                            scope.launch {
+                                scaffoldState.bottomSheetState.partialExpand()
+                            }
+                            mediaController.clearMediaItems()
+                        })
                     }
                 }
             }

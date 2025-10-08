@@ -39,6 +39,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.LocalContext
 import androidx.media3.session.MediaController
 import com.mirimomekiku.wavvy.enums.HomeScreenPages
 import com.mirimomekiku.wavvy.enums.Screens
@@ -59,6 +60,7 @@ fun HomeScreen(
 ) {
     val navController = LocalNavController.current
     val playbackViewModel = LocalPlaybackViewModel.current
+    val context = LocalContext.current
 
     var uiState by rememberSaveable { mutableStateOf("Songs") }
     val textFieldState = rememberTextFieldState()
@@ -76,7 +78,7 @@ fun HomeScreen(
     }
 
     DisposableEffect(Unit) {
-        playbackViewModel.attachController(mediaController)
+        playbackViewModel.attachController(mediaController, context)
 
         onDispose { }
     }
@@ -114,7 +116,8 @@ fun HomeScreen(
                         ) {
                             HeadingLogo()
                             Spacer(modifier = Modifier.weight(1f, fill = true))
-                            Icon(imageVector = Icons.Filled.Search,
+                            Icon(
+                                imageVector = Icons.Filled.Search,
                                 contentDescription = "Search music",
                                 modifier = Modifier
                                     .clip(MaterialTheme.shapes.extraLarge)
@@ -136,12 +139,14 @@ fun HomeScreen(
                         ) {
                             HomeScreenPages.entries.forEach { page ->
                                 if (page.icon != null) { // Check if it's the special icon button
-                                    SelectableIconButton(imageVector = if (uiState == page.title) page.selectedIcon!! else page.unselectedIcon!!,
+                                    SelectableIconButton(
+                                        imageVector = if (uiState == page.title) page.selectedIcon!! else page.unselectedIcon!!,
                                         contentDescription = page.title,
                                         selected = uiState == page.title,
                                         onClick = { onPageClick(page) })
                                 } else {
-                                    SelectableButton(text = page.title,
+                                    SelectableButton(
+                                        text = page.title,
                                         selected = uiState == page.title,
                                         onClick = { onPageClick(page) })
                                 }
@@ -155,7 +160,8 @@ fun HomeScreen(
                         modifier = Modifier.padding(horizontal = 12.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(imageVector = Icons.Filled.Close,
+                        Icon(
+                            imageVector = Icons.Filled.Close,
                             contentDescription = "Close search bar",
                             modifier = Modifier
                                 .clip(MaterialTheme.shapes.extraLarge)

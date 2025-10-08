@@ -19,6 +19,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.media3.session.MediaController
 import com.mirimomekiku.wavvy.extensions.getDominantColor
@@ -39,6 +40,7 @@ fun AppBottomSheetBar(
 ) {
     val favoriteViewModel = LocalFavoriteViewModel.current
     val playbackViewModel = LocalPlaybackViewModel.current
+    val context = LocalContext.current
 
     val pagerState = rememberPagerState(pageCount = { 3 }, initialPage = 0)
     val currentMediaItem by playbackViewModel.currentMediaItem.collectAsStateWithLifecycle()
@@ -50,7 +52,7 @@ fun AppBottomSheetBar(
     }
 
     DisposableEffect(Unit) {
-        playbackViewModel.attachController(mediaController)
+        playbackViewModel.attachController(mediaController, context)
 
         onDispose { }
     }

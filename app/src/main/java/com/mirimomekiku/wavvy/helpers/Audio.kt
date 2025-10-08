@@ -9,6 +9,8 @@ import androidx.media3.common.MediaMetadata
 import com.mirimomekiku.wavvy.extensions.KEY_DOMINANT_COLOR
 import com.mirimomekiku.wavvy.helpers.getAlbumArtURIDominantColorAdjusted
 import kotlinx.parcelize.Parcelize
+import java.io.File
+import androidx.core.net.toUri
 
 @Parcelize
 data class AudioFile(
@@ -61,7 +63,7 @@ fun formatDurationMs(durationMs: Long): String {
 
 fun getAlbumArtUri(albumId: Long?): Uri? {
     return if (albumId != null) {
-        Uri.parse("content://media/external/audio/albumart/$albumId")
+        "content://media/external/audio/albumart/$albumId".toUri()
     } else null
 }
 
@@ -164,8 +166,8 @@ fun getAllAudioFiles(context: Context): List<MediaItem> {
 
             val extras = Bundle().apply {
                 dominantColor.let { putInt(KEY_DOMINANT_COLOR, it) }
-                putInt(KEY_DISC_NUMBER, discNumber!!)
-                putInt(KEY_TRACK_NUMBER, trackNumber!!)
+                putInt(KEY_DISC_NUMBER, discNumber)
+                putInt(KEY_TRACK_NUMBER, trackNumber)
                 safeString(composerCol)?.let { putString("composer", it) }
                 safeInt(bitrateCol)?.let { putInt("bitrate", it) }
                 safeLong(sizeCol)?.let { putLong("size_bytes", it) }
@@ -205,4 +207,19 @@ fun getAllAudioFiles(context: Context): List<MediaItem> {
             { it.mediaMetadata.title?.toString() ?: it.mediaMetadata.albumTitle?.toString() ?: "" }
         )
     )
+}
+
+fun getAlbumArtFile(context: Context, uri: Uri, songId: Long): File? {
+    return try {
+        val input = context.contentResolver.openInputStream(uri)
+        val file = File(context.cacheDir, "album_$songId.png")
+        input?.use { inputStream ->
+            file.outputStream().use { output ->
+                inputStream.copyTo(output)
+            }
+        }
+        file
+    } catch (e: Exception) {
+        null
+    }
 }
