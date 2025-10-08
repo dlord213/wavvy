@@ -25,7 +25,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -39,7 +38,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.platform.LocalContext
 import androidx.media3.session.MediaController
 import com.mirimomekiku.wavvy.enums.HomeScreenPages
 import com.mirimomekiku.wavvy.enums.Screens
@@ -60,7 +58,6 @@ fun HomeScreen(
 ) {
     val navController = LocalNavController.current
     val playbackViewModel = LocalPlaybackViewModel.current
-    val context = LocalContext.current
 
     var uiState by rememberSaveable { mutableStateOf("Songs") }
     val textFieldState = rememberTextFieldState()
@@ -75,12 +72,6 @@ fun HomeScreen(
         pagerCoroutineScope.launch {
             pagerState.animateScrollToPage(page.ordinal)
         }
-    }
-
-    DisposableEffect(Unit) {
-        playbackViewModel.attachController(mediaController, context)
-
-        onDispose { }
     }
 
     LaunchedEffect(pagerState) {

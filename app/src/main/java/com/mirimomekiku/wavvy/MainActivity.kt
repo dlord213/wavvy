@@ -38,6 +38,7 @@ import androidx.room.Room
 import com.google.common.util.concurrent.ListenableFuture
 import com.mirimomekiku.wavvy.db.AppDatabase
 import com.mirimomekiku.wavvy.enums.Screens
+import com.mirimomekiku.wavvy.extensions.getDominantColor
 import com.mirimomekiku.wavvy.helpers.getDominantColorAdjusted
 import com.mirimomekiku.wavvy.services.PlaybackService
 import com.mirimomekiku.wavvy.ui.composables.AppBottomSheetBar
@@ -76,6 +77,10 @@ class MainActivity : ComponentActivity() {
             playbackViewModel.attachController(mediaController!!, this)
             playbackViewModel.updatePlayingState(mediaController!!.isPlaying)
             playbackViewModel.updateCurrentMediaItem(mediaController!!.currentMediaItem)
+            playbackViewModel.updateBottomBarColor(
+                mediaController!!.currentMediaItem?.getDominantColor()?.let { Color(it) } ?: Color(
+                    0xFF484848
+                ))
 
         }, ContextCompat.getMainExecutor(this))
 
@@ -220,6 +225,10 @@ class MainActivity : ComponentActivity() {
 
     override fun onStop() {
         super.onStop()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
         controllerFuture?.let { MediaController.releaseFuture(it) }
         mediaController = null
     }
