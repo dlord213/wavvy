@@ -39,6 +39,7 @@ import coil.request.CachePolicy
 import coil.request.ImageRequest
 import com.mirimomekiku.wavvy.enums.Screens
 import com.mirimomekiku.wavvy.extensions.KEY_DOMINANT_COLOR
+import com.mirimomekiku.wavvy.ui.composables.dialogs.AddToPlaylistDialog
 import com.mirimomekiku.wavvy.ui.compositions.LocalNavController
 import com.mirimomekiku.wavvy.ui.compositions.LocalPlaybackViewModel
 import formatDurationMs
@@ -58,6 +59,8 @@ fun MediaItemRow(
     val playbackViewModel = LocalPlaybackViewModel.current
     val navController = LocalNavController.current
     var menuExpanded by rememberSaveable { mutableStateOf(false) }
+
+    var showAddToPlaylistDialog by rememberSaveable { mutableStateOf(false) }
 
     fun playAudio() {
         val existingIndex = (0 until mediaController.mediaItemCount).firstOrNull { i ->
@@ -107,7 +110,8 @@ fun MediaItemRow(
     }
 
     Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = modifier.fillMaxWidth()) {
-        Row(verticalAlignment = Alignment.CenterVertically,
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .weight(1f)
                 .clip(MaterialTheme.shapes.medium)
@@ -129,10 +133,8 @@ fun MediaItemRow(
 
                 AsyncImage(
                     model = ImageRequest.Builder(LocalContext.current)
-                        .data(audio.mediaMetadata.artworkUri)
-                        .crossfade(true)
-                        .memoryCachePolicy(CachePolicy.ENABLED)
-                        .diskCachePolicy(CachePolicy.ENABLED)
+                        .data(audio.mediaMetadata.artworkUri).crossfade(true)
+                        .memoryCachePolicy(CachePolicy.ENABLED).diskCachePolicy(CachePolicy.ENABLED)
                         .build(),
                     contentDescription = "Album art",
                     placeholder = ColorPainter(Color(dominantColor)),
@@ -167,7 +169,7 @@ fun MediaItemRow(
 
             if (showDuration == true) {
                 Text(
-                    formatDurationMs(audio.mediaMetadata.durationMs!!.toLong()),
+                    formatDurationMs(audio.mediaMetadata.durationMs!!),
                     style = MaterialTheme.typography.labelSmall,
                     textAlign = TextAlign.Center
                 )
@@ -184,12 +186,12 @@ fun MediaItemRow(
                         contentDescription = "Repeat Mode",
                     )
                     DropdownMenu(
-                        expanded = menuExpanded,
-                        onDismissRequest = { menuExpanded = false }) {
+                        expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
                         DropdownMenuItem(
                             text = { Text("Play next") },
                             onClick = { addToQueueNext() })
-                        DropdownMenuItem(text = { Text("Add to playing queue") },
+                        DropdownMenuItem(
+                            text = { Text("Add to playing queue") },
                             onClick = { addToQueue() })
                         if (showGoToAlbum) {
                             DropdownMenuItem(text = { Text("Go to album") }, onClick = {
@@ -209,9 +211,18 @@ fun MediaItemRow(
                                 }
                             })
                         }
+                        DropdownMenuItem(text = { Text("Add to playlist") }, onClick = {
+                            showAddToPlaylistDialog = true
+                        })
                     }
                 }
             }
         }
+    }
+
+    if (showAddToPlaylistDialog) {
+        AddToPlaylistDialog(audio, onDismiss = {
+            showAddToPlaylistDialog = false
+        })
     }
 }

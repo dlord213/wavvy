@@ -91,6 +91,7 @@ fun PlaybackInfo(
     val favoriteItem by favoriteViewModel.getFavoriteById(
         mediaController.currentMediaItem?.mediaId ?: ""
     ).collectAsState(initial = null)
+
     val isFavorite = favoriteItem != null
 
     var menuExpanded by rememberSaveable { mutableStateOf(false) }

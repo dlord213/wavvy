@@ -47,6 +47,7 @@ import com.mirimomekiku.wavvy.ui.composables.SelectableIconButton
 import com.mirimomekiku.wavvy.ui.composables.pages.AlbumsPage
 import com.mirimomekiku.wavvy.ui.composables.pages.ArtistsPage
 import com.mirimomekiku.wavvy.ui.composables.pages.FavoritePage
+import com.mirimomekiku.wavvy.ui.composables.pages.PlaylistsPage
 import com.mirimomekiku.wavvy.ui.composables.pages.SongsPage
 import com.mirimomekiku.wavvy.ui.compositions.LocalNavController
 import com.mirimomekiku.wavvy.ui.compositions.LocalPlaybackViewModel
@@ -62,7 +63,7 @@ fun HomeScreen(
     var uiState by rememberSaveable { mutableStateOf("Songs") }
     val textFieldState = rememberTextFieldState()
 
-    val pagerState = rememberPagerState(pageCount = { 4 }, initialPage = 1)
+    val pagerState = rememberPagerState(pageCount = { 5 }, initialPage = 1)
     val pagerCoroutineScope = rememberCoroutineScope()
 
     val headingPagerState = rememberPagerState(pageCount = { 2 }, initialPage = 0)
@@ -79,8 +80,9 @@ fun HomeScreen(
             uiState = when (page) {
                 0 -> "Favorites"
                 1 -> "Songs"
-                2 -> "Artists"
-                3 -> "Albums"
+                2 -> "Playlists"
+                3 -> "Artists"
+                4 -> "Albums"
                 else -> uiState
             }
         }
@@ -116,7 +118,8 @@ fun HomeScreen(
                                         headingCoroutineScope.launch {
                                             headingPagerState.animateScrollToPage(1)
                                         }
-                                    })
+                                    }
+                            )
                         }
 
                         Row(
@@ -215,11 +218,15 @@ fun HomeScreen(
                 }
 
                 2 -> {
+                    PlaylistsPage(mediaController)
+                }
+
+                3 -> {
                     ArtistsPage(mediaController)
 
                 }
 
-                3 -> {
+                4 -> {
                     AlbumsPage(mediaController)
                 }
             }

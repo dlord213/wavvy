@@ -28,7 +28,7 @@ fun HeadingLogo() {
             modifier = Modifier.size(28.dp)
         )
         Text(
-            "Wavvy", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.W900
+            "Wavvy", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Black
         )
     }
 }

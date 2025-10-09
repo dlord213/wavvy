@@ -1,13 +1,14 @@
-import androidx.room.Entity
-import androidx.room.PrimaryKey
+package com.mirimomekiku.wavvy.db.entity
+
+import androidx.core.net.toUri
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import com.mirimomekiku.wavvy.extensions.KEY_DOMINANT_COLOR
-import androidx.core.net.toUri
 
-@Entity(tableName = "favorites")
-data class Favorite(
-    @PrimaryKey val mediaId: String, // match MediaItem.mediaId
+data class PlaylistItem(
+    @PrimaryKey val mediaId: String,
     val uri: String,
     val title: String,
     val artist: String?,
@@ -27,7 +28,15 @@ data class Favorite(
     val dateModified: Long?
 )
 
-fun Favorite.toMediaItem(): MediaItem {
+@Entity(tableName = "playlists")
+data class Playlists(
+    @PrimaryKey val playlistId: String,
+    val playlistName: String,
+    val items: List<PlaylistItem>
+)
+
+// Convert PlaylistItem → MediaItem
+fun PlaylistItem.toMediaItem(): MediaItem {
     val extras = android.os.Bundle().apply {
         dominantColor?.let { putInt(KEY_DOMINANT_COLOR, it) }
         discNumber?.let { putInt("disc_number", it) }
@@ -61,11 +70,10 @@ fun Favorite.toMediaItem(): MediaItem {
         .build()
 }
 
-
-fun MediaItem.toFavoriteEntity(): Favorite {
+// Convert MediaItem → PlaylistItem
+fun MediaItem.toPlaylistEntity(): PlaylistItem {
     val extras = mediaMetadata.extras
-
-    return Favorite(
+    return PlaylistItem(
         mediaId = mediaId,
         uri = localConfiguration?.uri.toString(),
         title = mediaMetadata.title?.toString() ?: "Unknown",
@@ -86,3 +94,7 @@ fun MediaItem.toFavoriteEntity(): Favorite {
         dateModified = extras?.getLong("date_modified")
     )
 }
+
+// Helper conversions
+fun List<MediaItem>.toPlaylistItems() = map { it.toPlaylistEntity() }
+fun List<PlaylistItem>.toMediaItems() = map { it.toMediaItem() }

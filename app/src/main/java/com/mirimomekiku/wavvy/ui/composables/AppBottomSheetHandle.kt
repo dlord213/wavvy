@@ -64,7 +64,6 @@ fun AppBottomSheetHandle(
     val playingState by playbackViewModel.isPlaying.collectAsStateWithLifecycle()
 
     var progress by remember { mutableStateOf(0f) }
-    var duration by remember { mutableStateOf(0f) }
     val opacity by animateFloatAsState(
         targetValue = if (scaffoldState.bottomSheetState.currentValue != SheetValue.Expanded) 1f else 0f,
         label = "opacityAnimation"
@@ -77,7 +76,6 @@ fun AppBottomSheetHandle(
             val pos = mediaController.currentPosition.coerceAtLeast(0L)
             val dur = mediaController.duration.coerceAtLeast(1L) // avoid divide-by-zero
             progress = pos.toFloat() / dur.toFloat()
-            duration = dur.toFloat()
             delay(500L)
         }
     }
@@ -86,10 +84,12 @@ fun AppBottomSheetHandle(
         Column(
             modifier = Modifier
                 .alpha(opacity)
+                .clip(MaterialTheme.shapes.extraLarge)
                 .clickable(
                     interactionSource = interactionSource,
                     indication = null
-                ) {
+                )
+                {
                     scope.launch {
                         scaffoldState.bottomSheetState.expand()
                     }

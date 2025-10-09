@@ -8,6 +8,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 enum class HomeScreenPages(val title: String, val icon: ImageVector? = null) {
     Favorites("Favorites", Icons.Filled.Favorite),
     Songs("Songs"),
+    Playlists("Playlists"),
     Artists("Artists"),
     Albums("Albums");
 

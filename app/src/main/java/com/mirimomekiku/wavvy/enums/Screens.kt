@@ -5,5 +5,6 @@ enum class Screens {
     Home,
     Artist,
     Album,
-    Search
+    Search,
+    Settings,
 }

@@ -8,8 +8,10 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.PlayArrow
@@ -19,6 +21,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -26,29 +29,37 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.media3.session.MediaController
 import coil.compose.AsyncImage
 import com.mirimomekiku.wavvy.extensions.getDominantColor
 import com.mirimomekiku.wavvy.ui.composables.MediaItemRow
 import com.mirimomekiku.wavvy.ui.compositions.LocalNavController
 import com.mirimomekiku.wavvy.ui.compositions.LocalPlaybackViewModel
+import com.mirimomekiku.wavvy.ui.compositions.LocalPlaylistViewModel
+import com.mirimomekiku.wavvy.viewmodel.PlaylistWithMediaItems
 
 @Composable
-fun AlbumScreen(mediaController: MediaController) {
+fun PlaylistScreen(
+    id: String,
+    mediaController: MediaController,
+) {
+    val playlistViewModel = LocalPlaylistViewModel.current
     val playbackViewModel = LocalPlaybackViewModel.current
     val navController = LocalNavController.current
 
-    val album by playbackViewModel.albumSelected.collectAsStateWithLifecycle()
+    val playlist by playlistViewModel.observePlaylistAsMediaItems(id)
+        .collectAsState(
+            initial = PlaylistWithMediaItems(
+                name = "Loading...",
+                mediaItems = emptyList()
+            )
+        )
 
     fun playAllSongs() {
         mediaController.clearMediaItems()
-        mediaController.setMediaItems(
-            album?.songs?.sortedBy { it -> it.mediaMetadata.trackNumber } ?: emptyList()
-        )
+        mediaController.setMediaItems(playlist.mediaItems)
 
-        val bgColor = mediaController.currentMediaItem?.getDominantColor()
-            ?.let { Color(it) }
+        val bgColor = mediaController.currentMediaItem?.getDominantColor()?.let { Color(it) }
             ?: Color.DarkGray
 
         playbackViewModel.updateCurrentMediaItem(mediaController.currentMediaItem)
@@ -64,21 +75,23 @@ fun AlbumScreen(mediaController: MediaController) {
         Row {
             IconButton(onClick = { navController.popBackStack() }) {
                 Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back"
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back"
                 )
             }
         }
 
-
-        LazyColumn(
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(2),
             contentPadding = PaddingValues(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier.fillMaxSize()
         ) {
-            item {
+
+
+            item(span = { GridItemSpan(maxLineSpan) }) {
                 AsyncImage(
-                    model = album?.songs?.get(0)?.mediaMetadata?.artworkUri,
+                    model = playlist.mediaItems.firstOrNull()?.mediaMetadata?.artworkUri,
                     contentDescription = "Album art",
                     placeholder = ColorPainter(Color(0xFF484848)),
                     error = ColorPainter(Color(0xFF484848)),
@@ -89,25 +102,22 @@ fun AlbumScreen(mediaController: MediaController) {
                 )
             }
 
-            item {
+            item(span = { GridItemSpan(maxLineSpan) }) {
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text(
-                        album?.album.toString(),
+                        playlist.name,
                         style = MaterialTheme.typography.headlineLarge,
                         fontWeight = FontWeight.Black
-                    )
-                    Text(
-                        album?.songs?.get(0)?.mediaMetadata?.artist.toString(),
-                        style = MaterialTheme.typography.labelMedium
                     )
                 }
             }
 
-            item {
-                Row {
+            item(span = { GridItemSpan(maxLineSpan) }) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
                     FilledTonalButton(
-                        onClick = { playAllSongs() },
-                        modifier = Modifier.weight(1f, fill = true)
+                        onClick = { playAllSongs() }, modifier = Modifier.weight(1f, fill = true)
                     ) {
                         Icon(
                             imageVector = Icons.Filled.PlayArrow,
@@ -116,9 +126,10 @@ fun AlbumScreen(mediaController: MediaController) {
                         Text("Play all", style = MaterialTheme.typography.labelLarge)
                     }
                 }
+
             }
 
-            item {
+            item(span = { GridItemSpan(maxLineSpan) }) {
                 Text(
                     "Songs",
                     style = MaterialTheme.typography.bodyLarge,
@@ -127,23 +138,13 @@ fun AlbumScreen(mediaController: MediaController) {
             }
 
             items(
-                album?.songs?.sortedWith(
-                    compareBy(
-                    { it.mediaMetadata.extras?.getInt("disc_number") ?: 0 },
-                    { it.mediaMetadata.extras?.getInt("track_number") ?: 0 }
-                )) ?: emptyList(),
-                key = { it.mediaId }
-            ) { song ->
-
+                playlist.mediaItems,
+                span = { GridItemSpan(maxLineSpan) }, key = { it.mediaId }) { song ->
                 MediaItemRow(
                     audio = song,
                     mediaController = mediaController,
-                    showGoToAlbum = false,
-                    albumTrackNumber = if (song.mediaMetadata.extras?.getInt("track_number") != null) song.mediaMetadata.extras?.getInt(
-                        "track_number"
-                    ).toString() else song.mediaMetadata.extras?.getInt("disc_number").toString(),
-                    showAlbumTrackNumber = true,
-                    showDuration = true,
+                    showGoToArtist = false,
+                    showDuration = false,
                 )
             }
         }
