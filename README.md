@@ -25,8 +25,8 @@ An elegant Material You themed music player app
 | ![](./images/7.jpg) | ![](./images/8.jpg) | ![](./images/9.jpg) |
 |---------------------|---------------------|---------------------|
 
-| ![](./images/10.jpg) | ![](./images/11.png) |
-|----------------------|----------------------|
+| ![](./images/10.jpg) | ![](./images/11.jpg) |
+|----------------------|--------------------|
 
 ## Created this for what?
 
