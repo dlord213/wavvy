@@ -25,6 +25,7 @@ import androidx.media3.session.MediaController
 import com.mirimomekiku.wavvy.extensions.getDominantColor
 import com.mirimomekiku.wavvy.ui.composables.player.expandedsheet.defaultmaterial3.PlaybackArtistInfo
 import com.mirimomekiku.wavvy.ui.composables.player.expandedsheet.defaultmaterial3.PlaybackInfo
+import com.mirimomekiku.wavvy.ui.composables.player.expandedsheet.defaultmaterial3.PlaybackLyricsInfo
 import com.mirimomekiku.wavvy.ui.composables.player.expandedsheet.defaultmaterial3.PlaybackQueue
 import com.mirimomekiku.wavvy.ui.compositions.LocalFavoriteViewModel
 import com.mirimomekiku.wavvy.ui.compositions.LocalPlaybackViewModel
@@ -42,7 +43,7 @@ fun AppBottomSheetBar(
     val playbackViewModel = LocalPlaybackViewModel.current
     val context = LocalContext.current
 
-    val pagerState = rememberPagerState(pageCount = { 3 }, initialPage = 0)
+    val pagerState = rememberPagerState(pageCount = { 4 }, initialPage = 0)
     val currentMediaItem by playbackViewModel.currentMediaItem.collectAsStateWithLifecycle()
 
     BackHandler(enabled = scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded) {
@@ -117,6 +118,7 @@ fun AppBottomSheetBar(
                 beyondViewportPageCount = 1,
             ) { page ->
                 when (page) {
+
                     0 -> PlaybackInfo(
                         toggleFavorites = {
                             toggleFavorite()
@@ -133,6 +135,10 @@ fun AppBottomSheetBar(
 
                     2 -> {
                         PlaybackArtistInfo()
+                    }
+
+                    3 -> {
+                        PlaybackLyricsInfo(mediaController)
                     }
                 }
             }

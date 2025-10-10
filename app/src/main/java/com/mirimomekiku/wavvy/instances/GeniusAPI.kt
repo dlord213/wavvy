@@ -82,7 +82,7 @@ interface GeniusAPIService {
     ): GeniusArtistResponse
 }
 
-object RetrofitInstance {
+object GeniusRetrofitInstance {
     private const val BASE_URL = "https://api.genius.com/"
 
     val api: GeniusAPIService by lazy {

@@ -3,6 +3,7 @@ package com.mirimomekiku.wavvy.ui.viewmodels
 import AlbumWithSongs
 import ArtistWithAlbums
 import android.content.Context
+import android.util.Log
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -16,9 +17,10 @@ import com.mirimomekiku.wavvy.extensions.currentMediaItems
 import com.mirimomekiku.wavvy.extensions.getDominantColor
 import com.mirimomekiku.wavvy.extensions.shuffledQueue
 import com.mirimomekiku.wavvy.instances.GeniusArtistResponse
-import com.mirimomekiku.wavvy.instances.RetrofitInstance
+import com.mirimomekiku.wavvy.instances.GeniusRetrofitInstance
+import com.mirimomekiku.wavvy.instances.LRCLibAPIRetrofitInstance
+import com.mirimomekiku.wavvy.instances.LRCLibOkResponse
 import com.mirimomekiku.wavvy.instances.extractPrimaryArtist
-import getAlbumArtFile
 import getAllAudioFiles
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -39,6 +41,7 @@ class PlaybackViewModel : ViewModel() {
     private val _queue = MutableStateFlow<List<MediaItem>>(emptyList())
     private val _searchQuery = MutableStateFlow<String?>(null)
     private val _artistInfo = MutableStateFlow<GeniusArtistResponse?>(null)
+    private val _lyricsInfo = MutableStateFlow<LRCLibOkResponse?>(null)
 
     // States for selected screens (albums/artists)
     private val _albumSelected = MutableStateFlow<AlbumWithSongs?>(null)
@@ -58,6 +61,7 @@ class PlaybackViewModel : ViewModel() {
     val artistSelected: StateFlow<ArtistWithAlbums?> = _artistSelected
     val searchQuery: StateFlow<String?> = _searchQuery
     val artistInfo: StateFlow<GeniusArtistResponse?> = _artistInfo
+    val lyricsInfo: StateFlow<LRCLibOkResponse?> = _lyricsInfo
 
     // Load local audio into state
     fun loadAudioFiles(context: Context) {
@@ -75,11 +79,12 @@ class PlaybackViewModel : ViewModel() {
                 _artistInfo.value = null
                 val artistQuery = extractPrimaryArtist(artistName)
                 val token = BuildConfig.token
-                val response = RetrofitInstance.api.search(query = artistQuery, token = token)
+                val response = GeniusRetrofitInstance.api.search(query = artistQuery, token = token)
 
                 val song = response.response.hits.firstOrNull()?.result
+                Log.d("genius", song.toString())
                 val info = song?.primary_artist?.id?.let {
-                    RetrofitInstance.api.getArtist(
+                    GeniusRetrofitInstance.api.getArtist(
                         it,
                         token = token
                     )
@@ -88,6 +93,40 @@ class PlaybackViewModel : ViewModel() {
             } catch (e: Exception) {
                 e.printStackTrace()
                 _artistInfo.value = null
+            }
+        }
+    }
+
+    private fun fetchLyrics(
+        trackName: String,
+        artistName: String,
+        albumName: String,
+        duration: Long
+    ) {
+
+        if (trackName.isBlank() && artistName.isBlank() && albumName.isBlank() && duration == 0L) {
+            Log.d("lyrics", "no parameters")
+        }
+
+        viewModelScope.launch {
+            _lyricsInfo.value = null
+
+            val response = LRCLibAPIRetrofitInstance.api.getLyrics(
+                trackName = trackName,
+                artistName = artistName,
+                albumName = albumName,
+                duration = (duration / 1000L).coerceIn(1, 3600)
+            )
+
+            Log.d("lyrics", "${trackName}, ${artistName}, ${albumName}, ${duration}")
+            Log.d("lyrics", response.headers().toString())
+
+            if (response.isSuccessful) {
+                _lyricsInfo.value = response.body()
+                Log.d("lyrics", response.toString())
+            } else {
+                val errorBody = response.errorBody()?.string()
+                Log.e("lyrics", "Error ${response.code()}: $errorBody")
             }
         }
     }
@@ -110,6 +149,13 @@ class PlaybackViewModel : ViewModel() {
                 mediaItem?.mediaMetadata?.artist?.toString()?.let { artistName ->
                     fetchGeniusArtistInfo(artistName)
                 }
+
+                fetchLyrics(
+                    mediaItem?.mediaMetadata?.title.toString(),
+                    artistName = mediaItem?.mediaMetadata?.artist.toString(),
+                    albumName = mediaItem?.mediaMetadata?.albumTitle.toString(),
+                    duration = mediaItem?.mediaMetadata?.durationMs ?: 0L
+                )
 
                 _currentMediaItem.value = mediaItem
                 _bottomBarColor.value =

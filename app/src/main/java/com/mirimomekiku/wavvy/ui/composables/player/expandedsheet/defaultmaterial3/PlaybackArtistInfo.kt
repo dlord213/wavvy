@@ -29,19 +29,18 @@ fun PlaybackArtistInfo() {
     val playbackViewModel = LocalPlaybackViewModel.current
 
     val artistInfo by playbackViewModel.artistInfo.collectAsStateWithLifecycle()
-
-    if (artistInfo != null) {
-        Column(
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp)
-        ) {
-            Text(
-                "About artist",
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Black
-            )
+    Column(
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
+        Text(
+            "About artist",
+            style = MaterialTheme.typography.headlineMedium,
+            fontWeight = FontWeight.Black
+        )
+        if (artistInfo != null) {
             LazyColumn(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
@@ -77,15 +76,13 @@ fun PlaybackArtistInfo() {
                     }
                 }
             }
-        }
-    } else {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            CircularProgressIndicator()
+        } else {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
         }
     }
-
-
 }

@@ -17,6 +17,7 @@ import androidx.compose.material.icons.filled.Equalizer
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Lyrics
 import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
@@ -204,6 +205,28 @@ fun PlaybackInfo(
                     .fillMaxWidth()
                     .horizontalScroll(rememberScrollState())
             ) {
+                FilledTonalButton(
+                    onClick = {
+                        scope.launch {
+                            pagerState.animateScrollToPage(3)
+                        }
+                    }, colors = ButtonColors(
+                        containerColor = baseColor,
+                        contentColor = textColor,
+                        disabledTextColor,
+                        disabledTextContentColor
+                    )
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Lyrics,
+                        contentDescription = "Song Lyrics"
+                    )
+                    Text(
+                        "Lyrics",
+                        style = MaterialTheme.typography.labelLarge,
+                        modifier = Modifier.padding(start = 8.dp)
+                    )
+                }
                 FilledTonalButton(
                     onClick = { openEqualizer(context) }, colors = ButtonColors(
                         containerColor = baseColor,
