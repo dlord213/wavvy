@@ -74,19 +74,19 @@ class MainActivity : ComponentActivity() {
         controllerFuture.addListener({
             mediaController = controllerFuture.get()
 
-            val playbackViewModel: PlaybackViewModel =
-                ViewModelProvider(this)[PlaybackViewModel::class.java]
-
-            playbackViewModel.attachController(mediaController!!, this)
-            playbackViewModel.updatePlayingState(mediaController!!.isPlaying)
-            playbackViewModel.updateCurrentMediaItem(mediaController!!.currentMediaItem)
-            playbackViewModel.updateBottomBarColor(
-                mediaController!!.currentMediaItem?.getDominantColor()?.let { Color(it) } ?: Color(
-                    0xFF484848
-                ))
-
+            mediaController?.let { mediaController ->
+                val playbackViewModel: PlaybackViewModel =
+                    ViewModelProvider(this)[PlaybackViewModel::class.java]
+                playbackViewModel.attachController(mediaController, this)
+                playbackViewModel.updatePlayingState(mediaController.isPlaying)
+                playbackViewModel.updateCurrentMediaItem(mediaController.currentMediaItem)
+                playbackViewModel.updateBottomBarColor(
+                    mediaController.currentMediaItem?.getDominantColor()?.let { Color(it) }
+                        ?: Color(
+                            0xFF484848
+                        ))
+            }
         }, ContextCompat.getMainExecutor(this))
-
     }
 
     @OptIn(ExperimentalMaterial3Api::class)

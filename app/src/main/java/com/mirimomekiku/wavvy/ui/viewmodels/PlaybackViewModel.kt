@@ -4,7 +4,6 @@ import AlbumWithSongs
 import ArtistWithAlbums
 import android.content.Context
 import androidx.compose.ui.graphics.Color
-import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.media3.common.MediaItem
@@ -19,7 +18,6 @@ import com.mirimomekiku.wavvy.extensions.shuffledQueue
 import com.mirimomekiku.wavvy.instances.GeniusArtistResponse
 import com.mirimomekiku.wavvy.instances.RetrofitInstance
 import com.mirimomekiku.wavvy.instances.extractPrimaryArtist
-import com.mirimomekiku.wavvy.widgets.WidgetUpdater
 import getAlbumArtFile
 import getAllAudioFiles
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -116,20 +114,6 @@ class PlaybackViewModel : ViewModel() {
                 _currentMediaItem.value = mediaItem
                 _bottomBarColor.value =
                     mediaItem?.getDominantColor()?.let { Color(it) } ?: Color(0xFF484848)
-
-                viewModelScope.launch {
-
-                    val uri = getAlbumArtFile(
-                        context, mediaItem?.mediaMetadata?.artworkUri!!, mediaItem.mediaId.toLong()
-                    )
-
-                    WidgetUpdater.updateNowPlaying(
-                        context = context,
-                        mediaItem = mediaItem,
-                        uri = uri!!.toUri()
-                    )
-                }
-
             }
 
             override fun onIsPlayingChanged(isPlaying: Boolean) {
