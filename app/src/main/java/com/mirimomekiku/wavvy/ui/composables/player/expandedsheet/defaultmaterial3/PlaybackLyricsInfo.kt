@@ -24,48 +24,63 @@ import kotlinx.coroutines.delay
 @Composable
 fun PlaybackLyricsInfo(mediaController: MediaController) {
     val playbackViewModel = LocalPlaybackViewModel.current
+
     val lyricsInfo by playbackViewModel.lyricsInfo.collectAsStateWithLifecycle()
+    val showLyrics by playbackViewModel.showLyrics.collectAsStateWithLifecycle()
 
-    Column(
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        Text(
-            "Song lyrics",
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Black
-        )
+    if (showLyrics) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+        ) {
+            Text(
+                "Song lyrics",
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Black
+            )
 
-        if (lyricsInfo != null) {
-            val syncedLines = remember(lyricsInfo) {
-                lyricsInfo?.syncedLyrics
-                    ?.lines()
-                    ?.mapNotNull { line ->
-                        val match = Regex("""\[(\d{2}):(\d{2}\.\d{2})] ?(.*)""").find(line)
-                        match?.let {
-                            val (min, sec, text) = it.destructured
-                            ((min.toInt() * 60 * 1000) + (sec.toFloat() * 1000).toInt()) to text
-                        }
-                    } ?: emptyList()
-            }
+            if (lyricsInfo != null) {
+                val syncedLines = remember(lyricsInfo) {
+                    lyricsInfo?.syncedLyrics
+                        ?.lines()
+                        ?.mapNotNull { line ->
+                            val match = Regex("""\[(\d{2}):(\d{2}\.\d{2})] ?(.*)""").find(line)
+                            match?.let {
+                                val (min, sec, text) = it.destructured
+                                ((min.toInt() * 60 * 1000) + (sec.toFloat() * 1000).toInt()) to text
+                            }
+                        } ?: emptyList()
+                }
 
-            val position by produceState(initialValue = 0L) {
-                while (true) {
-                    value = mediaController.currentPosition
-                    delay(300)
+                val position by produceState(initialValue = 0L) {
+                    while (true) {
+                        value = mediaController.currentPosition
+                        delay(300)
+                    }
+                }
+
+                SyncedLyrics(syncedLines, position)
+            } else {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
                 }
             }
-
-            SyncedLyrics(syncedLines, position)
-        } else {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
-            }
+        }
+    } else {
+        Box(
+            modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
+        ) {
+            Text(
+                "Auto-fetch synced lyrics is disabled.",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Black
+            )
         }
     }
+
 }

@@ -16,8 +16,7 @@ enum class PlayingNowTheme(val value: Int) {
     DEFAULT(0), FULL(1), MINI(2), CARD(3), MP3(4);
 
     companion object {
-        fun fromValue(value: Int): PlayingNowTheme =
-            entries.find { it.value == value } ?: DEFAULT
+        fun fromValue(value: Int): PlayingNowTheme = entries.find { it.value == value } ?: DEFAULT
     }
 }
 
@@ -25,8 +24,7 @@ enum class AppTheme(val value: Int) {
     FOLLOW_SYSTEM(0), LIGHT(1), DARK(2);
 
     companion object {
-        fun fromValue(value: Int): AppTheme =
-            entries.find { it.value == value } ?: FOLLOW_SYSTEM
+        fun fromValue(value: Int): AppTheme = entries.find { it.value == value } ?: FOLLOW_SYSTEM
     }
 }
 
@@ -36,6 +34,7 @@ object SettingsKeys {
     val playingNowTheme = intPreferencesKey("playing_now_theme")
     val showExtraDetails = booleanPreferencesKey("show_extra_details_on_playing_now")
     val enableFetchingArtistBiography = booleanPreferencesKey("enable_fetching_artist_biography")
+    val enableFetchingLyrics = booleanPreferencesKey("enable_fetching_lyrics")
     val showExtraControlsOnSheetBar = booleanPreferencesKey("show_extra_controls_on_sheet_bar")
 }
 
@@ -64,6 +63,11 @@ val Context.showExtraDetailsFlow: Flow<Boolean>
 val Context.enableFetchingArtistBiographyFlow: Flow<Boolean>
     get() = dataStore.data.map { prefs ->
         prefs[SettingsKeys.enableFetchingArtistBiography] ?: true
+    }
+
+val Context.enableFetchingLyricsFlow: Flow<Boolean>
+    get() = dataStore.data.map { prefs ->
+        prefs[SettingsKeys.enableFetchingLyrics] ?: true
     }
 
 val Context.showExtraControlsOnSheetBarFlow: Flow<Boolean>
@@ -98,6 +102,12 @@ suspend fun toggleExtraDetails(context: Context, value: Boolean) {
 suspend fun toggleArtistBiography(context: Context, value: Boolean) {
     context.dataStore.edit { prefs ->
         prefs[SettingsKeys.enableFetchingArtistBiography] = value
+    }
+}
+
+suspend fun toggleLyrics(context: Context, value: Boolean) {
+    context.dataStore.edit { prefs ->
+        prefs[SettingsKeys.enableFetchingLyrics] = value
     }
 }
 

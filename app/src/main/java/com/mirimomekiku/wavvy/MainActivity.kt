@@ -47,6 +47,7 @@ import com.mirimomekiku.wavvy.ui.compositions.LocalFavoriteViewModel
 import com.mirimomekiku.wavvy.ui.compositions.LocalNavController
 import com.mirimomekiku.wavvy.ui.compositions.LocalPlaybackViewModel
 import com.mirimomekiku.wavvy.ui.compositions.LocalPlaylistViewModel
+import com.mirimomekiku.wavvy.ui.compositions.LocalSettingsViewModel
 import com.mirimomekiku.wavvy.ui.screens.AlbumScreen
 import com.mirimomekiku.wavvy.ui.screens.ArtistScreen
 import com.mirimomekiku.wavvy.ui.screens.HomeScreen
@@ -58,7 +59,10 @@ import com.mirimomekiku.wavvy.ui.theme.WavvyTheme
 import com.mirimomekiku.wavvy.ui.viewmodels.FavoriteViewModel
 import com.mirimomekiku.wavvy.ui.viewmodels.FavoriteViewModelFactory
 import com.mirimomekiku.wavvy.ui.viewmodels.PlaybackViewModel
+import com.mirimomekiku.wavvy.ui.viewmodels.PlaybackViewModelFactory
 import com.mirimomekiku.wavvy.ui.viewmodels.PlaylistViewModelFactory
+import com.mirimomekiku.wavvy.ui.viewmodels.SettingsViewModel
+import com.mirimomekiku.wavvy.ui.viewmodels.SettingsViewModelFactory
 import com.mirimomekiku.wavvy.viewmodel.PlaylistViewModel
 
 class MainActivity : ComponentActivity() {
@@ -94,7 +98,6 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val context = LocalContext.current
-            val playbackViewModel: PlaybackViewModel = viewModel()
             val db = Room.databaseBuilder(
                 applicationContext, AppDatabase::class.java, "app-db"
             ).fallbackToDestructiveMigration(false).build()
@@ -102,158 +105,178 @@ class MainActivity : ComponentActivity() {
             val favoriteDao = db.favoriteDao()
             val playlistDao = db.playlistsDao()
 
+
             val favoriteViewModel: FavoriteViewModel = viewModel(
                 factory = FavoriteViewModelFactory(favoriteDao)
             )
             val playlistViewModel: PlaylistViewModel = viewModel(
                 factory = PlaylistViewModelFactory(playlistDao)
             )
+            val settingsViewModel: SettingsViewModel = viewModel(
+                factory = SettingsViewModelFactory(context)
+            )
+
+            val playbackViewModel: PlaybackViewModel = viewModel(
+                factory = PlaybackViewModelFactory(
+                    settingsViewModel.enableFetchingLyrics,
+                    settingsViewModel.enableFetchingArtistBiography,
+                )
+            )
 
             val navController = rememberNavController()
             val scope = rememberCoroutineScope()
             val scaffoldState = rememberBottomSheetScaffoldState()
 
-            WavvyTheme {
-                CompositionLocalProvider(LocalNavController provides navController) {
-                    CompositionLocalProvider(LocalPlaybackViewModel provides playbackViewModel) {
-                        CompositionLocalProvider(LocalFavoriteViewModel provides favoriteViewModel) {
-                            CompositionLocalProvider(LocalPlaylistViewModel provides playlistViewModel) {
+            val appTheme by settingsViewModel.appTheme.collectAsStateWithLifecycle()
+            val materialYou by settingsViewModel.enableMaterialYou.collectAsStateWithLifecycle()
 
-                                val currentMediaItem by playbackViewModel.currentMediaItem.collectAsStateWithLifecycle()
-                                val bgColor by playbackViewModel.bottomBarColor.collectAsStateWithLifecycle()
+            WavvyTheme(
+                theme = appTheme,
+                dynamicColor = materialYou,
+            ) {
+                CompositionLocalProvider(LocalSettingsViewModel provides settingsViewModel) {
+                    CompositionLocalProvider(LocalNavController provides navController) {
+                        CompositionLocalProvider(LocalPlaybackViewModel provides playbackViewModel) {
+                            CompositionLocalProvider(LocalFavoriteViewModel provides favoriteViewModel) {
+                                CompositionLocalProvider(LocalPlaylistViewModel provides playlistViewModel) {
 
-                                val baseColor = getDominantColorAdjusted(
-                                    context, currentMediaItem?.mediaMetadata?.artworkUri
-                                )
+                                    val currentMediaItem by playbackViewModel.currentMediaItem.collectAsStateWithLifecycle()
+                                    val bgColor by playbackViewModel.bottomBarColor.collectAsStateWithLifecycle()
 
-                                val textColor =
-                                    if (baseColor.luminance() > 0.5f) Color.Black else Color.White
+                                    val baseColor = getDominantColorAdjusted(
+                                        context, currentMediaItem?.mediaMetadata?.artworkUri
+                                    )
 
-                                val animatedBaseColor by animateColorAsState(
-                                    targetValue = bgColor ?: MaterialTheme.colorScheme.background,
-                                    label = "sheetBaseColorAnimation",
-                                )
-                                val animatedTextColor by animateColorAsState(
-                                    targetValue = textColor,
-                                    label = "sheetTextColorAnimation",
-                                )
+                                    val textColor =
+                                        if (baseColor.luminance() > 0.5f) Color.Black else Color.White
 
-                                BottomSheetScaffold(
-                                    modifier = Modifier
-                                        .animateContentSize()
-                                        .navigationBarsPadding(),
-                                    scaffoldState = scaffoldState,
-                                    sheetPeekHeight = if (currentMediaItem != null) 68.dp else 0.dp,
-                                    sheetDragHandle = {
-                                        mediaController?.let {
-                                            AppBottomSheetHandle(
-                                                scaffoldState = scaffoldState,
-                                                mediaController = it,
-                                                scope = scope
-                                            )
-                                        }
-                                    },
-                                    sheetContent = {
-                                        mediaController?.let {
-                                            AppBottomSheetBar(
-                                                scaffoldState, it, scope
-                                            )
-                                        }
-                                    },
-                                    sheetContainerColor = animatedBaseColor,
-                                    sheetContentColor = animatedTextColor,
-                                ) { innerPadding ->
-                                    NavHost(
-                                        navController = navController,
-                                        startDestination = Screens.Start.name,
+                                    val animatedBaseColor by animateColorAsState(
+                                        targetValue = bgColor
+                                            ?: MaterialTheme.colorScheme.background,
+                                        label = "sheetBaseColorAnimation",
+                                    )
+                                    val animatedTextColor by animateColorAsState(
+                                        targetValue = textColor,
+                                        label = "sheetTextColorAnimation",
+                                    )
+
+                                    BottomSheetScaffold(
                                         modifier = Modifier
-                                            .padding(innerPadding)
-                                            .padding(top = 28.dp)
-                                    ) {
-                                        composable(route = Screens.Start.name) {
-                                            StartScreen()
-                                        }
-                                        composable(route = Screens.Home.name) {
-                                            if (mediaController != null) {
-                                                HomeScreen(mediaController = mediaController!!)
-                                            } else {
-                                                Box(
-                                                    modifier = Modifier.fillMaxSize(),
-                                                    contentAlignment = Alignment.Center
-                                                ) {
-                                                    CircularProgressIndicator()
-                                                }
-                                            }
-                                        }
-                                        composable(route = Screens.Artist.name) {
-                                            if (mediaController != null) {
-                                                ArtistScreen(mediaController = mediaController!!)
-                                            } else {
-                                                Box(
-                                                    modifier = Modifier.fillMaxSize(),
-                                                    contentAlignment = Alignment.Center
-                                                ) {
-                                                    CircularProgressIndicator()
-                                                }
-                                            }
-                                        }
-                                        composable(route = Screens.Album.name) {
-                                            if (mediaController != null) {
-                                                AlbumScreen(mediaController = mediaController!!)
-                                            } else {
-                                                Box(
-                                                    modifier = Modifier.fillMaxSize(),
-                                                    contentAlignment = Alignment.Center
-                                                ) {
-                                                    CircularProgressIndicator()
-                                                }
-                                            }
-                                        }
-                                        composable(route = Screens.Search.name) {
-                                            if (mediaController != null) {
-                                                SearchScreen(mediaController = mediaController!!)
-                                            } else {
-                                                Box(
-                                                    modifier = Modifier.fillMaxSize(),
-                                                    contentAlignment = Alignment.Center
-                                                ) {
-                                                    CircularProgressIndicator()
-                                                }
-                                            }
-                                        }
-                                        composable(route = Screens.Settings.name) {
-                                            if (mediaController != null) {
-                                                SettingsScreen()
-                                            } else {
-                                                Box(
-                                                    modifier = Modifier.fillMaxSize(),
-                                                    contentAlignment = Alignment.Center
-                                                ) {
-                                                    CircularProgressIndicator()
-                                                }
-                                            }
-                                        }
-                                        composable(
-                                            route = "playlist/{playlistId}"
-                                        ) { backStackEntry ->
-                                            val playlistId =
-                                                backStackEntry.arguments?.getString("playlistId")
-                                                    ?: ""
-                                            if (mediaController != null) {
-                                                PlaylistScreen(
-                                                    id = playlistId,
-                                                    mediaController = mediaController!!
+                                            .animateContentSize()
+                                            .navigationBarsPadding(),
+                                        scaffoldState = scaffoldState,
+                                        sheetPeekHeight = if (currentMediaItem != null) 68.dp else 0.dp,
+                                        sheetDragHandle = {
+                                            mediaController?.let {
+                                                AppBottomSheetHandle(
+                                                    scaffoldState = scaffoldState,
+                                                    mediaController = it,
+                                                    scope = scope
                                                 )
-                                            } else {
-                                                Box(
-                                                    modifier = Modifier.fillMaxSize(),
-                                                    contentAlignment = Alignment.Center
-                                                ) {
-                                                    CircularProgressIndicator()
+                                            }
+                                        },
+                                        sheetContent = {
+                                            mediaController?.let {
+                                                AppBottomSheetBar(
+                                                    scaffoldState, it, scope
+                                                )
+                                            }
+                                        },
+                                        sheetContainerColor = animatedBaseColor,
+                                        sheetContentColor = animatedTextColor,
+                                    ) { innerPadding ->
+                                        NavHost(
+                                            navController = navController,
+                                            startDestination = Screens.Start.name,
+                                            modifier = Modifier
+                                                .padding(innerPadding)
+                                                .padding(top = 28.dp)
+                                        ) {
+                                            composable(route = Screens.Start.name) {
+                                                StartScreen()
+                                            }
+                                            composable(route = Screens.Home.name) {
+                                                if (mediaController != null) {
+                                                    HomeScreen(mediaController = mediaController!!)
+                                                } else {
+                                                    Box(
+                                                        modifier = Modifier.fillMaxSize(),
+                                                        contentAlignment = Alignment.Center
+                                                    ) {
+                                                        CircularProgressIndicator()
+                                                    }
                                                 }
                                             }
-                                        }
+                                            composable(route = Screens.Artist.name) {
+                                                if (mediaController != null) {
+                                                    ArtistScreen(mediaController = mediaController!!)
+                                                } else {
+                                                    Box(
+                                                        modifier = Modifier.fillMaxSize(),
+                                                        contentAlignment = Alignment.Center
+                                                    ) {
+                                                        CircularProgressIndicator()
+                                                    }
+                                                }
+                                            }
+                                            composable(route = Screens.Album.name) {
+                                                if (mediaController != null) {
+                                                    AlbumScreen(mediaController = mediaController!!)
+                                                } else {
+                                                    Box(
+                                                        modifier = Modifier.fillMaxSize(),
+                                                        contentAlignment = Alignment.Center
+                                                    ) {
+                                                        CircularProgressIndicator()
+                                                    }
+                                                }
+                                            }
+                                            composable(route = Screens.Search.name) {
+                                                if (mediaController != null) {
+                                                    SearchScreen(mediaController = mediaController!!)
+                                                } else {
+                                                    Box(
+                                                        modifier = Modifier.fillMaxSize(),
+                                                        contentAlignment = Alignment.Center
+                                                    ) {
+                                                        CircularProgressIndicator()
+                                                    }
+                                                }
+                                            }
+                                            composable(route = Screens.Settings.name) {
+                                                if (mediaController != null) {
+                                                    SettingsScreen()
+                                                } else {
+                                                    Box(
+                                                        modifier = Modifier.fillMaxSize(),
+                                                        contentAlignment = Alignment.Center
+                                                    ) {
+                                                        CircularProgressIndicator()
+                                                    }
+                                                }
+                                            }
+                                            composable(
+                                                route = "playlist/{playlistId}"
+                                            ) { backStackEntry ->
+                                                val playlistId =
+                                                    backStackEntry.arguments?.getString("playlistId")
+                                                        ?: ""
+                                                if (mediaController != null) {
+                                                    PlaylistScreen(
+                                                        id = playlistId,
+                                                        mediaController = mediaController!!
+                                                    )
+                                                } else {
+                                                    Box(
+                                                        modifier = Modifier.fillMaxSize(),
+                                                        contentAlignment = Alignment.Center
+                                                    ) {
+                                                        CircularProgressIndicator()
+                                                    }
+                                                }
+                                            }
 
+                                        }
                                     }
                                 }
                             }

@@ -19,6 +19,7 @@ import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -109,6 +110,15 @@ fun HomeScreen(
                         ) {
                             HeadingLogo()
                             Spacer(modifier = Modifier.weight(1f, fill = true))
+                            Icon(
+                                imageVector = Icons.Filled.Settings,
+                                contentDescription = "App settings",
+                                modifier = Modifier
+                                    .clip(MaterialTheme.shapes.extraLarge)
+                                    .clickable {
+                                        navController.navigate(Screens.Settings.name)
+                                    }
+                            )
                             Icon(
                                 imageVector = Icons.Filled.Search,
                                 contentDescription = "Search music",

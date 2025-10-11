@@ -26,7 +26,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-class PlaybackViewModel : ViewModel() {
+class PlaybackViewModel(
+    private val enableFetchingLyrics: StateFlow<Boolean>,
+    private val enableFetchingArtistBiography: StateFlow<Boolean>,
+) : ViewModel() {
 
     // Playback state
     private val _currentMediaItem = MutableStateFlow<MediaItem?>(null)
@@ -63,6 +66,9 @@ class PlaybackViewModel : ViewModel() {
     val artistInfo: StateFlow<GeniusArtistResponse?> = _artistInfo
     val lyricsInfo: StateFlow<LRCLibOkResponse?> = _lyricsInfo
 
+    val showLyrics: StateFlow<Boolean> = enableFetchingLyrics
+    val showArtistBiography: StateFlow<Boolean> = enableFetchingArtistBiography
+
     // Load local audio into state
     fun loadAudioFiles(context: Context) {
         viewModelScope.launch {
@@ -72,6 +78,9 @@ class PlaybackViewModel : ViewModel() {
     }
 
     private fun fetchGeniusArtistInfo(artistName: String) {
+
+        if (!enableFetchingArtistBiography.value) return
+
         if (artistName.isBlank()) return
 
         viewModelScope.launch {
@@ -104,9 +113,9 @@ class PlaybackViewModel : ViewModel() {
         duration: Long
     ) {
 
-        if (trackName.isBlank() && artistName.isBlank() && albumName.isBlank() && duration == 0L) {
-            Log.d("lyrics", "no parameters")
-        }
+        if (!enableFetchingLyrics.value) return
+
+        if (trackName.isBlank() && artistName.isBlank() && albumName.isBlank() && duration == 0L) return
 
         viewModelScope.launch {
             _lyricsInfo.value = null

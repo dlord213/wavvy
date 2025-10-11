@@ -14,6 +14,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SheetValue
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -43,7 +44,17 @@ fun AppBottomSheetBar(
     val playbackViewModel = LocalPlaybackViewModel.current
     val context = LocalContext.current
 
-    val pagerState = rememberPagerState(pageCount = { 4 }, initialPage = 0)
+    val showLyrics by playbackViewModel.showLyrics.collectAsState()
+    val showArtistBiography by playbackViewModel.showArtistBiography.collectAsState()
+
+    val pages = buildList {
+        add(0) // PlaybackInfo
+        add(1) // PlaybackQueue
+        if (showArtistBiography) add(2)
+        if (showLyrics) add(3)
+    }
+
+    val pagerState = rememberPagerState(pageCount = { pages.size }, initialPage = 0)
     val currentMediaItem by playbackViewModel.currentMediaItem.collectAsStateWithLifecycle()
 
     BackHandler(enabled = scaffoldState.bottomSheetState.currentValue == SheetValue.Expanded) {
@@ -66,7 +77,6 @@ fun AppBottomSheetBar(
         targetValue = containerColor ?: MaterialTheme.colorScheme.surfaceContainerHigh,
         label = "sheetColorAnimation",
     )
-
 
     fun toggleFavorite() {
         isFavorite = !isFavorite
@@ -116,13 +126,10 @@ fun AppBottomSheetBar(
                 state = pagerState,
                 modifier = Modifier.weight(1f),
                 beyondViewportPageCount = 1,
-            ) { page ->
-                when (page) {
-
+            ) { index ->
+                when (pages[index]) {
                     0 -> PlaybackInfo(
-                        toggleFavorites = {
-                            toggleFavorite()
-                        },
+                        toggleFavorites = { toggleFavorite() },
                         pagerState = pagerState,
                         scope = scope,
                         mediaController = mediaController,
@@ -133,13 +140,9 @@ fun AppBottomSheetBar(
                         mediaController = mediaController
                     )
 
-                    2 -> {
-                        PlaybackArtistInfo()
-                    }
+                    2 -> PlaybackArtistInfo()
 
-                    3 -> {
-                        PlaybackLyricsInfo(mediaController)
-                    }
+                    3 -> PlaybackLyricsInfo(mediaController)
                 }
             }
         }

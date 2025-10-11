@@ -29,60 +29,75 @@ fun PlaybackArtistInfo() {
     val playbackViewModel = LocalPlaybackViewModel.current
 
     val artistInfo by playbackViewModel.artistInfo.collectAsStateWithLifecycle()
-    Column(
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-    ) {
-        Text(
-            "About artist",
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Black
-        )
-        if (artistInfo != null) {
-            LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                item {
-                    AsyncImage(
-                        model = artistInfo?.response?.artist?.image_url,
-                        contentDescription = "Artist image",
-                        placeholder = ColorPainter(Color(0xFF484848)),
-                        error = ColorPainter(Color(0xFF484848)),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .aspectRatio(1f)
-                            .clip(MaterialTheme.shapes.medium)
-                    )
-                }
+    val showArtistBiography by playbackViewModel.showArtistBiography.collectAsStateWithLifecycle()
 
-                if (artistInfo?.response?.artist?.name != null) {
+    if (showArtistBiography) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+        ) {
+            Text(
+                "About artist",
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Black
+            )
+            if (artistInfo != null) {
+                LazyColumn(
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
                     item {
-                        Text(
-                            artistInfo?.response?.artist?.name.toString(),
-                            style = MaterialTheme.typography.headlineLarge,
-                            fontWeight = FontWeight.Black
+                        AsyncImage(
+                            model = artistInfo?.response?.artist?.image_url,
+                            contentDescription = "Artist image",
+                            placeholder = ColorPainter(Color(0xFF484848)),
+                            error = ColorPainter(Color(0xFF484848)),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .aspectRatio(1f)
+                                .clip(MaterialTheme.shapes.medium)
                         )
                     }
-                }
 
-                if (artistInfo?.response?.artist?.description != null) {
-                    item {
-                        Text(
-                            artistInfo?.response?.artist?.description?.plain.toString(),
-                            style = MaterialTheme.typography.bodyMedium,
-                        )
+                    if (artistInfo?.response?.artist?.name != null) {
+                        item {
+                            Text(
+                                artistInfo?.response?.artist?.name.toString(),
+                                style = MaterialTheme.typography.headlineLarge,
+                                fontWeight = FontWeight.Black
+                            )
+                        }
+                    }
+
+                    if (artistInfo?.response?.artist?.description != null) {
+                        item {
+                            Text(
+                                artistInfo?.response?.artist?.description?.plain.toString(),
+                                style = MaterialTheme.typography.bodyMedium,
+                            )
+                        }
                     }
                 }
-            }
-        } else {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
+            } else {
+                Box(
+                    modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
             }
         }
+    } else {
+        Box(
+            modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
+        ) {
+            Text(
+                "Auto-fetch artist biography is disabled.",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Black
+            )
+        }
     }
+
+
 }

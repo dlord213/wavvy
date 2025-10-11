@@ -16,6 +16,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.SkipNext
+import androidx.compose.material.icons.filled.SkipPrevious
 import androidx.compose.material3.BottomSheetScaffoldState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -26,8 +28,9 @@ import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -45,6 +48,7 @@ import androidx.media3.session.MediaController
 import coil.compose.AsyncImage
 import com.mirimomekiku.wavvy.helpers.getDominantColorAdjusted
 import com.mirimomekiku.wavvy.ui.compositions.LocalPlaybackViewModel
+import com.mirimomekiku.wavvy.ui.compositions.LocalSettingsViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -57,13 +61,15 @@ fun AppBottomSheetHandle(
     scope: CoroutineScope
 ) {
     val playbackViewModel = LocalPlaybackViewModel.current
+    val settingsViewModel = LocalSettingsViewModel.current
     val context = LocalContext.current
 
     val interactionSource = remember { MutableInteractionSource() }
     val currentMediaItem by playbackViewModel.currentMediaItem.collectAsStateWithLifecycle()
     val playingState by playbackViewModel.isPlaying.collectAsStateWithLifecycle()
+    val showExtraControls by settingsViewModel.showExtraControlsOnSheetBar.collectAsState()
 
-    var progress by remember { mutableStateOf(0f) }
+    var progress by remember { mutableFloatStateOf(0f) }
     val opacity by animateFloatAsState(
         targetValue = if (scaffoldState.bottomSheetState.currentValue != SheetValue.Expanded) 1f else 0f,
         label = "opacityAnimation"
@@ -86,10 +92,8 @@ fun AppBottomSheetHandle(
                 .alpha(opacity)
                 .clip(MaterialTheme.shapes.extraLarge)
                 .clickable(
-                    interactionSource = interactionSource,
-                    indication = null
-                )
-                {
+                    interactionSource = interactionSource, indication = null
+                ) {
                     scope.launch {
                         scaffoldState.bottomSheetState.expand()
                     }
@@ -154,15 +158,47 @@ fun AppBottomSheetHandle(
                     )
                 }
 
-                IconButton(
-                    onClick = {
-                        if (playingState) mediaController.pause() else mediaController.play()
+
+                if (showExtraControls) {
+                    Row() {
+                        IconButton(onClick = {
+                            mediaController.seekToPrevious()
+                        }) {
+                            Icon(
+                                imageVector = Icons.Filled.SkipPrevious,
+                                contentDescription = "Go to previous track",
+                            )
+                        }
+                        IconButton(
+                            onClick = {
+                                if (playingState) mediaController.pause() else mediaController.play()
+                            }
+                        ) {
+                            Icon(
+                                imageVector = if (playingState) Icons.Filled.Pause else Icons.Filled.PlayArrow,
+                                contentDescription = if (playingState) "Pause" else "Play"
+                            )
+                        }
+                        IconButton(onClick = {
+                            mediaController.seekToNext()
+                        }) {
+                            Icon(
+                                imageVector = Icons.Filled.SkipNext,
+                                contentDescription = "Go to next track",
+                            )
+                        }
                     }
-                ) {
-                    Icon(
-                        imageVector = if (playingState) Icons.Filled.Pause else Icons.Filled.PlayArrow,
-                        contentDescription = if (playingState) "Pause" else "Play"
-                    )
+                } else {
+                    IconButton(
+                        onClick = {
+                            if (playingState) mediaController.pause() else mediaController.play()
+                        }
+                    ) {
+                        Icon(
+                            imageVector = if (playingState) Icons.Filled.Pause else Icons.Filled.PlayArrow,
+                            contentDescription = if (playingState) "Pause" else "Play"
+                        )
+                    }
                 }
             }
         }

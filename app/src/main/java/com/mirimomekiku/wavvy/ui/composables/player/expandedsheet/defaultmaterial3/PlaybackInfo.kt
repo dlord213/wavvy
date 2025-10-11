@@ -89,6 +89,9 @@ fun PlaybackInfo(
     val playbackViewModel = LocalPlaybackViewModel.current
     val context = LocalContext.current
 
+    val showLyrics by playbackViewModel.showLyrics.collectAsState()
+    val showArtistBiography by playbackViewModel.showArtistBiography.collectAsState()
+
     val favoriteItem by favoriteViewModel.getFavoriteById(
         mediaController.currentMediaItem?.mediaId ?: ""
     ).collectAsState(initial = null)
@@ -205,27 +208,31 @@ fun PlaybackInfo(
                     .fillMaxWidth()
                     .horizontalScroll(rememberScrollState())
             ) {
-                FilledTonalButton(
-                    onClick = {
-                        scope.launch {
-                            pagerState.animateScrollToPage(3)
-                        }
-                    }, colors = ButtonColors(
-                        containerColor = baseColor,
-                        contentColor = textColor,
-                        disabledTextColor,
-                        disabledTextContentColor
-                    )
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.Lyrics,
-                        contentDescription = "Song Lyrics"
-                    )
-                    Text(
-                        "Lyrics",
-                        style = MaterialTheme.typography.labelLarge,
-                        modifier = Modifier.padding(start = 8.dp)
-                    )
+
+
+                if (showLyrics) {
+                    FilledTonalButton(
+                        onClick = {
+                            scope.launch {
+                                pagerState.animateScrollToPage(3)
+                            }
+                        }, colors = ButtonColors(
+                            containerColor = baseColor,
+                            contentColor = textColor,
+                            disabledTextColor,
+                            disabledTextContentColor
+                        )
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Lyrics,
+                            contentDescription = "Song Lyrics"
+                        )
+                        Text(
+                            "Lyrics",
+                            style = MaterialTheme.typography.labelLarge,
+                            modifier = Modifier.padding(start = 8.dp)
+                        )
+                    }
                 }
                 FilledTonalButton(
                     onClick = { openEqualizer(context) }, colors = ButtonColors(
@@ -245,28 +252,31 @@ fun PlaybackInfo(
                         modifier = Modifier.padding(start = 8.dp)
                     )
                 }
-                FilledTonalButton(
-                    onClick = {
-                        scope.launch {
-                            pagerState.animateScrollToPage(
-                                2
-                            )
-                        }
-                    }, colors = ButtonColors(
-                        containerColor = baseColor,
-                        contentColor = textColor,
-                        disabledTextColor,
-                        disabledTextContentColor
-                    )
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.Info, contentDescription = "Song info"
-                    )
-                    Text(
-                        "Info",
-                        style = MaterialTheme.typography.labelLarge,
-                        modifier = Modifier.padding(start = 8.dp)
-                    )
+                if (showArtistBiography) {
+                    FilledTonalButton(
+                        onClick = {
+                            scope.launch {
+                                pagerState.animateScrollToPage(
+                                    2
+                                )
+                            }
+                        }, colors = ButtonColors(
+                            containerColor = baseColor,
+                            contentColor = textColor,
+                            disabledTextColor,
+                            disabledTextContentColor
+                        )
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Info,
+                            contentDescription = "About artist info"
+                        )
+                        Text(
+                            "About artist",
+                            style = MaterialTheme.typography.labelLarge,
+                            modifier = Modifier.padding(start = 8.dp)
+                        )
+                    }
                 }
                 FilledTonalButton(
                     onClick = { shareAudioFile() }, colors = ButtonColors(
