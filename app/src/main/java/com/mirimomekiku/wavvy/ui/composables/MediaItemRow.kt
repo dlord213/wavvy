@@ -42,6 +42,7 @@ import com.mirimomekiku.wavvy.extensions.KEY_DOMINANT_COLOR
 import com.mirimomekiku.wavvy.ui.composables.dialogs.AddToPlaylistDialog
 import com.mirimomekiku.wavvy.ui.compositions.LocalNavController
 import com.mirimomekiku.wavvy.ui.compositions.LocalPlaybackViewModel
+import com.mirimomekiku.wavvy.ui.compositions.LocalPlaylistViewModel
 import formatDurationMs
 
 @Composable
@@ -54,10 +55,14 @@ fun MediaItemRow(
     showAlbumTrackNumber: Boolean? = false,
     showDuration: Boolean? = false,
     showDropdown: Boolean? = true,
+    showRemovePlaylist: Boolean? = false,
+    playlistId: String? = null,
     modifier: Modifier = Modifier,
 ) {
     val playbackViewModel = LocalPlaybackViewModel.current
     val navController = LocalNavController.current
+    val playlistViewModel = LocalPlaylistViewModel.current
+
     var menuExpanded by rememberSaveable { mutableStateOf(false) }
 
     var showAddToPlaylistDialog by rememberSaveable { mutableStateOf(false) }
@@ -214,6 +219,14 @@ fun MediaItemRow(
                         DropdownMenuItem(text = { Text("Add to playlist") }, onClick = {
                             showAddToPlaylistDialog = true
                         })
+                        if (showRemovePlaylist == true) {
+                            DropdownMenuItem(text = { Text("Remove to playlist") }, onClick = {
+                                playlistViewModel.removeMediaItemFromPlaylist(
+                                    playlistId!!,
+                                    audio.mediaId
+                                )
+                            })
+                        }
                     }
                 }
             }

@@ -55,7 +55,6 @@ fun AddToPlaylistDialog(
                         mediaItems = listOf(mediaItem)
                     )
                     showCreateDialog = false
-                    onDismiss()
                 }
             }
         )

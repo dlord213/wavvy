@@ -12,15 +12,11 @@ import androidx.compose.ui.platform.LocalContext
 import com.mirimomekiku.wavvy.instances.AppTheme
 
 private val DarkColorScheme = darkColorScheme(
-    primary = Purple80,
-    secondary = PurpleGrey80,
-    tertiary = Pink80
+    primary = Purple80, secondary = PurpleGrey80, tertiary = Pink80
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = Purple40,
-    secondary = PurpleGrey40,
-    tertiary = Pink40
+    primary = Purple40, secondary = PurpleGrey40, tertiary = Pink40
 
     /* Other default colors to override
     background = Color(0xFFFFFBFE),
@@ -35,17 +31,30 @@ private val LightColorScheme = lightColorScheme(
 
 @Composable
 fun WavvyTheme(
-    theme: AppTheme,
-    dynamicColor: Boolean = true,
-    content: @Composable () -> Unit
+    theme: AppTheme, dynamicColor: Boolean = true, content: @Composable () -> Unit
 ) {
     val isDark = isSystemInDarkTheme()
 
     val colorScheme = when (theme) {
-        AppTheme.LIGHT -> LightColorScheme
-        AppTheme.DARK -> DarkColorScheme
-        AppTheme.FOLLOW_SYSTEM -> {
+        AppTheme.LIGHT -> {
+            if (dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                val context = LocalContext.current
+                dynamicLightColorScheme(context)
+            } else {
+                LightColorScheme
+            }
+        }
 
+        AppTheme.DARK -> {
+            if (dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                val context = LocalContext.current
+                dynamicDarkColorScheme(context)
+            } else {
+                DarkColorScheme
+            }
+        }
+
+        AppTheme.FOLLOW_SYSTEM -> {
             if (dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 val context = LocalContext.current
                 if (isDark) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
@@ -56,8 +65,6 @@ fun WavvyTheme(
     }
 
     MaterialTheme(
-        colorScheme = colorScheme,
-        typography = Typography,
-        content = content
+        colorScheme = colorScheme, typography = Typography, content = content
     )
 }

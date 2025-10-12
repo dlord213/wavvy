@@ -14,6 +14,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
@@ -23,6 +24,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -72,10 +74,22 @@ fun PlaylistScreen(
     Column(
         modifier = Modifier.padding(horizontal = 6.dp),
     ) {
-        Row {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             IconButton(onClick = { navController.popBackStack() }) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back"
+                )
+            }
+            IconButton(onClick = {
+                playlistViewModel.deletePlaylist(id)
+                navController.popBackStack()
+            }) {
+                Icon(
+                    imageVector = Icons.Filled.Delete, contentDescription = "Delete"
                 )
             }
         }
@@ -145,6 +159,8 @@ fun PlaylistScreen(
                     mediaController = mediaController,
                     showGoToArtist = false,
                     showDuration = false,
+                    showRemovePlaylist = true,
+                    playlistId = id
                 )
             }
         }

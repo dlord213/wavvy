@@ -55,6 +55,17 @@ class PlaylistViewModel(
         }
     }
 
+    fun removeMediaItemFromPlaylist(playlistId: String, mediaId: String) {
+        viewModelScope.launch {
+            val playlist = playlistDao.getOne(playlistId)
+            if (playlist != null) {
+                val updatedItems = playlist.items.filterNot { it.mediaId == mediaId }
+                val updatedPlaylist = playlist.copy(items = updatedItems)
+                playlistDao.update(updatedPlaylist)
+            }
+        }
+    }
+
     fun observePlaylistAsMediaItems(
         playlistId: String
     ): Flow<PlaylistWithMediaItems> {

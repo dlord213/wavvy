@@ -17,11 +17,15 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.mirimomekiku.wavvy.ui.composables.dialogs.AppThemeSelectionDialog
 import com.mirimomekiku.wavvy.ui.compositions.LocalNavController
 import com.mirimomekiku.wavvy.ui.compositions.LocalSettingsViewModel
 
@@ -37,12 +41,19 @@ fun SettingsScreen() {
     val enableFetchingArtistBiography by settingsViewModel.enableFetchingArtistBiography.collectAsState()
     val enableFetchingLyrics by settingsViewModel.enableFetchingLyrics.collectAsState()
 
+    var showAppThemeSelectionDialog by rememberSaveable { mutableStateOf(false) }
+
+
+    if (showAppThemeSelectionDialog) {
+        AppThemeSelectionDialog(
+            onDismissRequest = { showAppThemeSelectionDialog = false }
+        )
+    }
 
     Column(
         modifier = Modifier.padding(12.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-
         Row(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically
@@ -61,14 +72,15 @@ fun SettingsScreen() {
                 fontWeight = FontWeight.Black
             )
         }
-
         Row(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(MaterialTheme.shapes.extraLarge)
-                .clickable {}
+                .clickable {
+                    showAppThemeSelectionDialog = true
+                }
         ) {
             Icon(
                 imageVector = Icons.Filled.ColorLens,
@@ -141,8 +153,6 @@ fun SettingsScreen() {
                 onCheckedChange = { settingsViewModel.toggleExtraDetails(it) }
             )
         }
-
-
         Row(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically

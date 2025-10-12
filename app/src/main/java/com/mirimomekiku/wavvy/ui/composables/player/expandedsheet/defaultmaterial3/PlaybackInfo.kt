@@ -1,5 +1,6 @@
 package com.mirimomekiku.wavvy.ui.composables.player.expandedsheet.defaultmaterial3
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -70,11 +71,13 @@ import com.mirimomekiku.wavvy.ui.composables.SelectableIconButton
 import com.mirimomekiku.wavvy.ui.compositions.LocalFavoriteViewModel
 import com.mirimomekiku.wavvy.ui.compositions.LocalNavController
 import com.mirimomekiku.wavvy.ui.compositions.LocalPlaybackViewModel
+import com.mirimomekiku.wavvy.ui.compositions.LocalSettingsViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.io.File
 
 // FOR _AUDIO_BOTTOM_SHEET USE ONLY
+@SuppressLint("DefaultLocale")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PlaybackInfo(
@@ -85,12 +88,14 @@ fun PlaybackInfo(
     scaffoldState: BottomSheetScaffoldState
 ) {
     val favoriteViewModel = LocalFavoriteViewModel.current
-    val navController = LocalNavController.current
     val playbackViewModel = LocalPlaybackViewModel.current
+    val navController = LocalNavController.current
+    val settingsViewModel = LocalSettingsViewModel.current
     val context = LocalContext.current
 
     val showLyrics by playbackViewModel.showLyrics.collectAsState()
     val showArtistBiography by playbackViewModel.showArtistBiography.collectAsState()
+    val showExtraDetails by settingsViewModel.showExtraDetails.collectAsState()
 
     val favoriteItem by favoriteViewModel.getFavoriteById(
         mediaController.currentMediaItem?.mediaId ?: ""
@@ -193,6 +198,36 @@ fun PlaybackInfo(
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
+
+                    if (showExtraDetails) {
+                        val bitrate = mediaItem?.mediaMetadata?.extras?.getInt("bitrate") ?: 0
+                        val sizeBytes =
+                            mediaItem?.mediaMetadata?.extras?.getLong("size_bytes") ?: 0L
+                        val mimeType =
+                            mediaItem?.mediaMetadata?.extras?.getString("mime_type") ?: "Unknown"
+
+                        val bitrateKbps = (bitrate / 1000).toString() + " kbps"
+
+                        val sizeFormatted = if (sizeBytes >= 1024 * 1024) {
+                            String.format("%.2f MB", sizeBytes / (1024f * 1024f))
+                        } else {
+                            String.format("%.2f KB", sizeBytes / 1024f)
+                        }
+
+                        val audioType = when {
+                            mimeType.contains("mpeg", ignoreCase = true) -> "MP3"
+                            mimeType.contains("mp4", ignoreCase = true) -> "MP4"
+                            mimeType.contains("aac", ignoreCase = true) -> "AAC"
+                            mimeType.contains("flac", ignoreCase = true) -> "FLAC"
+                            mimeType.contains("wav", ignoreCase = true) -> "WAV"
+                            else -> mimeType.uppercase()
+                        }
+
+                        Text(
+                            text = "$bitrateKbps • $sizeFormatted • $audioType",
+                            style = MaterialTheme.typography.bodySmall,
+                        )
+                    }
                 }
 
                 SelectableIconButton(
@@ -224,8 +259,7 @@ fun PlaybackInfo(
                         )
                     ) {
                         Icon(
-                            imageVector = Icons.Filled.Lyrics,
-                            contentDescription = "Song Lyrics"
+                            imageVector = Icons.Filled.Lyrics, contentDescription = "Song Lyrics"
                         )
                         Text(
                             "Lyrics",
